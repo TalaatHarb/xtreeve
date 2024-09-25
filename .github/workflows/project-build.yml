@@ -16,4 +16,4 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - run: mvn compile verify package
+      - run: cd xtreeve && mvn compile verify package
