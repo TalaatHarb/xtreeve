@@ -1,23 +1,26 @@
 package net.talaatharb.xtreeve.controllers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.Menu;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.talaatharb.xtreeve.utils.GUIUtils;
+import net.talaatharb.xtreeve.models.ProjectModel;
 
 @Slf4j
 @NoArgsConstructor
@@ -25,7 +28,7 @@ public class MainWindowController implements Initializable {
 
 	@Setter(value = AccessLevel.PACKAGE)
 	@FXML
-	private TreeView<JsonNode> treeView;
+	private TreeView<String> treeView;
 
 	@Setter(value = AccessLevel.PACKAGE)
 	@FXML
@@ -44,90 +47,129 @@ public class MainWindowController implements Initializable {
 		log.info("Main window loaded");
 
 	}
+	
+    private TreeItem<String> createTreeItem(JsonNode node, String name) {
+        TreeItem<String> treeItem;
 
-	Parent setupPane(String path, AnchorPane container) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getResource(path));
-		Parent root = null;
+        if (node.isObject()) {
+            // For XML elements with children or attributes
+            treeItem = new TreeItem<>(name);
 
-		try {
-			root = loader.load();
-		} catch (final IOException ex) {
-			log.error("{} Failed to load!", path);
-			log.error(ex.getMessage());
-		}
-		container.getChildren().add(root);
-		GUIUtils.setAnchorAll(root, 5.0);
-		return root;
-	}
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                TreeItem<String> childItem = createTreeItem(field.getValue(), field.getKey());
+                if(childItem.getChildren().isEmpty()) {
+                	childItem.setValue("Attribute: (" + field.getKey() + ": " + field.getValue().asText() + ")");
+                }
+                treeItem.getChildren().add(childItem);
+            }
+        } else if (node.isArray()) {
+        	int size = node.size();
+            treeItem = new TreeItem<>(name + " array(" + size + ")");
+            int i = 1;
+            for (JsonNode arrayElement : node) {
+                treeItem.getChildren().add(createTreeItem(arrayElement, name + "[" + i + "]"));
+                i++;
+            }
+        } else {
+            treeItem = new TreeItem<>(node.asText());
+        }
+
+        return treeItem;
+    }
 	
 	@FXML
 	void newClicked() {
-		log.debug("New Clicked");
+		log.info("New Clicked");
 	}
 	
 	@FXML
 	void openClicked() {
-		log.debug("Open Clicked");
+        FileChooser fileChooser = new FileChooser();
+
+        fileChooser.setTitle("Open XML File");
+
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("XML Files", "*.xml"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        if (selectedFile != null) {
+            String absolutePath = selectedFile.getAbsolutePath();
+			log.info("Selected file: " + absolutePath);
+            try {
+				ProjectModel model = new ProjectModel(absolutePath);
+				TreeItem<String> treeRoot = createTreeItem(model.getFileTree(), model.getRootTag());
+				treeView.setRoot(treeRoot);;
+			} catch (IOException e) {
+				log.error(e.getMessage());
+			}
+        } else {
+            log.debug("File selection cancelled.");
+        }
 	}
 	
 	@FXML
 	void closeClicked() {
-		log.debug("Close Clicked");
+		log.info("Close Clicked");
 	}
 	
 	@FXML
 	void saveClicked() {
-		log.debug("Save Clicked");
+		log.info("Save Clicked");
 	}
 	
 	@FXML
 	void saveAsClicked() {
-		log.debug("Save As Clicked");
+		log.info("Save As Clicked");
 	}
 	
 	@FXML
 	void resetClicked() {
-		log.debug("Reset Clicked");
+		log.info("Reset Clicked");
 	}
 	
 	@FXML
 	void preferencesClicked() {
-		log.debug("Preferences Clicked");
+		log.info("Preferences Clicked");
 	}
 	
 	@FXML
 	void quitClicked() {
-		log.debug("Quit Clicked");
+		log.info("Quit Clicked");
 	}
 	
 	@FXML
 	void aboutClicked() {
-		log.debug("About Clicked");
+		log.info("About Clicked");
 	}
 	
 	@FXML
 	void rollbackClicked() {
-		log.debug("Rollback Clicked");
+		log.info("Rollback Clicked");
 	}
 	
 	@FXML
 	void cutClicked() {
-		log.debug("Cut Clicked");
+		log.info("Cut Clicked");
 	}
 	
 	@FXML
 	void copyClicked() {
-		log.debug("Copy Clicked");
+		log.info("Copy Clicked");
 	}
 	
 	@FXML
 	void pasteClicked() {
-		log.debug("Paste Clicked");
+		log.info("Paste Clicked");
 	}
 	
 	@FXML
 	void deleteClicked() {
-		log.debug("Delete Clicked");
+		log.info("Delete Clicked");
 	}
 
 }
