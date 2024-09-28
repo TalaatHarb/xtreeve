@@ -106,7 +106,7 @@ public class MainWindowController implements Initializable {
 				}
 			}
 		} else if (node.isArray()) {
-			handleArrayNode(parent, node, name, 0, ARRAY_PAGINATION_LIMIT);
+			Platform.runLater(() -> handleArrayNode(parent, node, name, 0, ARRAY_PAGINATION_LIMIT));
 		} else {
 			Platform.runLater(() -> parent.getChildren().add(new TreeItem<>(node.asText())));
 		}
