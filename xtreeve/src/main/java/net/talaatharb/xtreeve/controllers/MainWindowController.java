@@ -60,10 +60,17 @@ public class MainWindowController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		log.info("Main window loaded");
 
+		treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem) {
+				log.info("Selected item: " + newValue.getValue());
+				log.info(jsonTreeItem.toString());
+			}
+		});
+
 	}
 
 	private TreeItem<String> createTreeItem(JsonNode node, String name) {
-		TreeItem<String> treeItem = new TreeItem<>(name);
+		TreeItem<String> treeItem = new JsonTreeItem(name, node);
 
 		// Initially, add an empty child to indicate lazy loading
 		treeItem.getChildren().add(new TreeItem<>(LOADING));
