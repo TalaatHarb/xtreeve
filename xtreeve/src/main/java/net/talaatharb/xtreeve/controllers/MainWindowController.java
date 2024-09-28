@@ -68,84 +68,86 @@ public class MainWindowController implements Initializable {
 		log.info("Main window loaded");
 
 		treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem && jsonTreeItem.getJsonNode().isObject()) {
-					var tableContent = createJsonNodeTable(jsonTreeItem.getJsonNode());
-					detailViewPane.getChildren().clear();
-					detailViewPane.getChildren().add(tableContent);
-					GUIUtils.setAnchorNoPadding(tableContent);
-				}
+			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem && (jsonTreeItem.getJsonNode()
+					.isObject()
+					|| (jsonTreeItem.getJsonNode().isArray() && jsonTreeItem.getJsonNode().get(0).isTextual()))) {
+				var tableContent = createJsonNodeTable(jsonTreeItem.getJsonNode());
+				detailViewPane.getChildren().clear();
+				detailViewPane.getChildren().add(tableContent);
+				GUIUtils.setAnchorNoPadding(tableContent);
+			}
 		});
 
 	}
-	
-    // A simple model class to hold the key-value pairs
-    public static class JsonNodeEntry {
-        private final String key;
-        private final String value;
 
-        public JsonNodeEntry(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
+	// A simple model class to hold the key-value pairs
+	public static class JsonNodeEntry {
+		private final String key;
+		private final String value;
 
-        public String getKey() {
-            return key;
-        }
+		public JsonNodeEntry(String key, String value) {
+			this.key = key;
+			this.value = value;
+		}
 
-        public String getValue() {
-            return value;
-        }
-    }
+		public String getKey() {
+			return key;
+		}
 
-    public static TableView<JsonNodeEntry> createJsonNodeTable(JsonNode node) {
-        // Create a TableView with two columns: one for keys and one for values
-        TableView<JsonNodeEntry> tableView = new TableView<>();
+		public String getValue() {
+			return value;
+		}
+	}
 
-        TableColumn<JsonNodeEntry, String> keyColumn = new TableColumn<>("Key");
-        keyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+	public static TableView<JsonNodeEntry> createJsonNodeTable(JsonNode node) {
+		// Create a TableView with two columns: one for keys and one for values
+		TableView<JsonNodeEntry> tableView = new TableView<>();
 
-        TableColumn<JsonNodeEntry, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+		TableColumn<JsonNodeEntry, String> keyColumn = new TableColumn<>("Key");
+		keyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
 
-        tableView.getColumns().add(keyColumn);
-        tableView.getColumns().add(valueColumn);
+		TableColumn<JsonNodeEntry, String> valueColumn = new TableColumn<>("Value");
+		valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
-        // Populate the table with data from the JsonNode
-        ObservableList<JsonNodeEntry> data = FXCollections.observableArrayList();
+		tableView.getColumns().add(keyColumn);
+		tableView.getColumns().add(valueColumn);
 
-        if (node.isObject()) {
-            // Handle object nodes by iterating over the fields
-            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                JsonNode value = field.getValue();
-                if(value.isTextual()) {                	
-                	data.add(new JsonNodeEntry(field.getKey(), value.asText()));
-                }
-            }
-        } else if (node.isArray()) {
-            // Handle array nodes by iterating over the elements
-            int index = 0;
-            for (JsonNode arrayElement : node) {
-                data.add(new JsonNodeEntry("Index " + index, arrayElement.asText()));
-                index++;
-            }
-        } else {
-            // For primitive values (non-object, non-array)
-            data.add(new JsonNodeEntry("Value", node.asText()));
-        }
+		// Populate the table with data from the JsonNode
+		ObservableList<JsonNodeEntry> data = FXCollections.observableArrayList();
 
-        tableView.setItems(data);
-        return tableView;
-    }
+		if (node.isObject()) {
+			// Handle object nodes by iterating over the fields
+			Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+			while (fields.hasNext()) {
+				Map.Entry<String, JsonNode> field = fields.next();
+				JsonNode value = field.getValue();
+				if (value.isTextual()) {
+					data.add(new JsonNodeEntry(field.getKey(), value.asText()));
+				}
+			}
+		} else if (node.isArray()) {
+			// Handle array nodes by iterating over the elements
+			int index = 0;
+			for (JsonNode arrayElement : node) {
+				data.add(new JsonNodeEntry("Index " + index, arrayElement.asText()));
+				index++;
+			}
+		} else {
+			// For primitive values (non-object, non-array)
+			data.add(new JsonNodeEntry("Value", node.asText()));
+		}
 
-    public static VBox createJsonNodeTableView(JsonNode node) {
-        // Create a VBox to hold the table
-        VBox vbox = new VBox();
-        TableView<JsonNodeEntry> tableView = createJsonNodeTable(node);
-        vbox.getChildren().add(tableView);
-        return vbox;
-    }
+		tableView.setItems(data);
+		return tableView;
+	}
+
+	public static VBox createJsonNodeTableView(JsonNode node) {
+		// Create a VBox to hold the table
+		VBox vbox = new VBox();
+		TableView<JsonNodeEntry> tableView = createJsonNodeTable(node);
+		vbox.getChildren().add(tableView);
+		return vbox;
+	}
 
 	private TreeItem<String> createTreeItem(JsonNode node, String name) {
 		TreeItem<String> treeItem = new JsonTreeItem(name, node);
