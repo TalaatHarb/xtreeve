@@ -3,9 +3,7 @@ package net.talaatharb.xtreeve.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -15,6 +13,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Menu;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
@@ -28,6 +27,10 @@ import net.talaatharb.xtreeve.models.ProjectModel;
 @Slf4j
 @NoArgsConstructor
 public class MainWindowController implements Initializable {
+
+	private static final String LOAD_MORE = "Load more...";
+
+	private static final int ARRAY_PAGINATION_LIMIT = 25;
 
 	private static final String LOADING = "Loading...";
 
@@ -47,6 +50,10 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private Menu openRecentMenu;
 
+	@Setter(value = AccessLevel.PACKAGE)
+	@FXML
+	private ProgressBar progressBar;
+
 	private ProjectModel model;
 
 	@Override
@@ -65,7 +72,7 @@ public class MainWindowController implements Initializable {
 		treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> {
 			if (isNewlyExpanded(treeItem, newValue)) {
 				treeItem.getChildren().clear();
-				loadChildren(treeItem, node, name);
+				new Thread(() -> loadChildren(treeItem, node, name)).start();
 			}
 
 		});
@@ -79,6 +86,7 @@ public class MainWindowController implements Initializable {
 	}
 
 	private void loadChildren(TreeItem<String> parent, JsonNode node, String name) {
+		Platform.runLater(() -> progressBar.setVisible(true));
 		if (node.isObject()) {
 			Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
 			while (fields.hasNext()) {
@@ -88,9 +96,9 @@ public class MainWindowController implements Initializable {
 					final TreeItem<String> childItem = new TreeItem<>(
 							"Attribute: (" + field.getKey() + ": " + value.asText() + ")");
 					Platform.runLater(() -> parent.getChildren().add(childItem));
-				}else {
+				} else {
 					String itemName = field.getKey();
-					if(value.isArray()) {
+					if (value.isArray()) {
 						itemName += " (" + value.size() + ")";
 					}
 					final TreeItem<String> childItem = createTreeItem(value, itemName);
@@ -98,20 +106,41 @@ public class MainWindowController implements Initializable {
 				}
 			}
 		} else if (node.isArray()) {
-			handleArrayNode(parent, node, name);
+			handleArrayNode(parent, node, name, 0, ARRAY_PAGINATION_LIMIT);
 		} else {
 			Platform.runLater(() -> parent.getChildren().add(new TreeItem<>(node.asText())));
 		}
+		Platform.runLater(() -> progressBar.setVisible(false));
 	}
 
-	private void handleArrayNode(TreeItem<String> parent, JsonNode node, String name) {
-		int i = 1;
-		final List<TreeItem<String>> children = new ArrayList<>();
-		for (JsonNode arrayElement : node) {
-			children.add(createTreeItem(arrayElement, name + "[" + i + "]"));
-			i++;
+	private void handleArrayNode(TreeItem<String> parent, JsonNode node, String name, int start, int count) {
+		int size = node.size();
+		var parentChildren = parent.getChildren();
+
+		// Load elements from the array
+		for (int i = start; i < start + count && i < size; i++) {
+			TreeItem<String> childItem = createTreeItem(node.get(i), name + "[" + i + "]");
+			parentChildren.add(childItem);
 		}
-		Platform.runLater(() -> parent.getChildren().addAll(children));
+
+		// Check if there are more elements to load
+		if (start + count < size) {
+			TreeItem<String> loadMoreItem = new TreeItem<>(LOAD_MORE);
+			loadMoreItem.setExpanded(false);
+
+			loadMoreItem.expandedProperty().addListener((observable, oldValue, newValue) -> {
+				if (newValue.booleanValue()) {
+					if (parentChildren.contains(loadMoreItem)) {
+						parentChildren.remove(loadMoreItem);
+					}
+					handleArrayNode(parent, node, name, start + count, ARRAY_PAGINATION_LIMIT);
+				}
+			});
+
+			if (!parentChildren.contains(loadMoreItem)) {
+				parentChildren.add(loadMoreItem);
+			}
+		}
 	}
 
 	@FXML
@@ -139,7 +168,9 @@ public class MainWindowController implements Initializable {
 
 			new Thread(() -> {
 				try {
+					Platform.runLater(() -> progressBar.setVisible(true));
 					loadXML(absolutePath);
+					Platform.runLater(() -> progressBar.setVisible(false));
 				} catch (IOException e) {
 					log.error("Unable to load file");
 				}
