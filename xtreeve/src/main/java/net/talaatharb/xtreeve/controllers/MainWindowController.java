@@ -10,19 +10,26 @@ import java.util.ResourceBundle;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.talaatharb.xtreeve.models.ProjectModel;
+import net.talaatharb.xtreeve.utils.GUIUtils;
 
 @Slf4j
 @NoArgsConstructor
@@ -61,13 +68,84 @@ public class MainWindowController implements Initializable {
 		log.info("Main window loaded");
 
 		treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem) {
-				log.info("Selected item: " + newValue.getValue());
-				log.info(jsonTreeItem.toString());
-			}
+			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem && jsonTreeItem.getJsonNode().isObject()) {
+					var tableContent = createJsonNodeTable(jsonTreeItem.getJsonNode());
+					detailViewPane.getChildren().clear();
+					detailViewPane.getChildren().add(tableContent);
+					GUIUtils.setAnchorNoPadding(tableContent);
+				}
 		});
 
 	}
+	
+    // A simple model class to hold the key-value pairs
+    public static class JsonNodeEntry {
+        private final String key;
+        private final String value;
+
+        public JsonNodeEntry(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public static TableView<JsonNodeEntry> createJsonNodeTable(JsonNode node) {
+        // Create a TableView with two columns: one for keys and one for values
+        TableView<JsonNodeEntry> tableView = new TableView<>();
+
+        TableColumn<JsonNodeEntry, String> keyColumn = new TableColumn<>("Key");
+        keyColumn.setCellValueFactory(new PropertyValueFactory<>("key"));
+
+        TableColumn<JsonNodeEntry, String> valueColumn = new TableColumn<>("Value");
+        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+
+        tableView.getColumns().add(keyColumn);
+        tableView.getColumns().add(valueColumn);
+
+        // Populate the table with data from the JsonNode
+        ObservableList<JsonNodeEntry> data = FXCollections.observableArrayList();
+
+        if (node.isObject()) {
+            // Handle object nodes by iterating over the fields
+            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                JsonNode value = field.getValue();
+                if(value.isTextual()) {                	
+                	data.add(new JsonNodeEntry(field.getKey(), value.asText()));
+                }
+            }
+        } else if (node.isArray()) {
+            // Handle array nodes by iterating over the elements
+            int index = 0;
+            for (JsonNode arrayElement : node) {
+                data.add(new JsonNodeEntry("Index " + index, arrayElement.asText()));
+                index++;
+            }
+        } else {
+            // For primitive values (non-object, non-array)
+            data.add(new JsonNodeEntry("Value", node.asText()));
+        }
+
+        tableView.setItems(data);
+        return tableView;
+    }
+
+    public static VBox createJsonNodeTableView(JsonNode node) {
+        // Create a VBox to hold the table
+        VBox vbox = new VBox();
+        TableView<JsonNodeEntry> tableView = createJsonNodeTable(node);
+        vbox.getChildren().add(tableView);
+        return vbox;
+    }
 
 	private TreeItem<String> createTreeItem(JsonNode node, String name) {
 		TreeItem<String> treeItem = new JsonTreeItem(name, node);
