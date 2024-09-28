@@ -3,12 +3,15 @@ package net.talaatharb.xtreeve.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Menu;
@@ -25,6 +28,8 @@ import net.talaatharb.xtreeve.models.ProjectModel;
 @Slf4j
 @NoArgsConstructor
 public class MainWindowController implements Initializable {
+
+	private static final String LOADING = "Loading...";
 
 	@Setter(value = AccessLevel.PACKAGE)
 	@FXML
@@ -51,33 +56,62 @@ public class MainWindowController implements Initializable {
 	}
 
 	private TreeItem<String> createTreeItem(JsonNode node, String name) {
-		TreeItem<String> treeItem;
+		TreeItem<String> treeItem = new TreeItem<>(name);
 
+		// Initially, add an empty child to indicate lazy loading
+		treeItem.getChildren().add(new TreeItem<>(LOADING));
+
+		// Handle the expansion event
+		treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> {
+			if (isNewlyExpanded(treeItem, newValue)) {
+				treeItem.getChildren().clear();
+				loadChildren(treeItem, node, name);
+			}
+
+		});
+
+		return treeItem;
+	}
+
+	boolean isNewlyExpanded(TreeItem<String> treeItem, Boolean newValue) {
+		return newValue.booleanValue() && treeItem.getChildren().size() == 1
+				&& treeItem.getChildren().get(0).getValue().equals(LOADING);
+	}
+
+	private void loadChildren(TreeItem<String> parent, JsonNode node, String name) {
 		if (node.isObject()) {
-			treeItem = new TreeItem<>(name);
-
 			Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
 			while (fields.hasNext()) {
 				Map.Entry<String, JsonNode> field = fields.next();
-				TreeItem<String> childItem = createTreeItem(field.getValue(), field.getKey());
-				if (childItem.getChildren().isEmpty()) {
-					childItem.setValue("Attribute: (" + field.getKey() + ": " + field.getValue().asText() + ")");
+				JsonNode value = field.getValue();
+				if (value.isTextual()) {
+					final TreeItem<String> childItem = new TreeItem<>(
+							"Attribute: (" + field.getKey() + ": " + value.asText() + ")");
+					Platform.runLater(() -> parent.getChildren().add(childItem));
+				}else {
+					String itemName = field.getKey();
+					if(value.isArray()) {
+						itemName += " (" + value.size() + ")";
+					}
+					final TreeItem<String> childItem = createTreeItem(value, itemName);
+					Platform.runLater(() -> parent.getChildren().add(childItem));
 				}
-				treeItem.getChildren().add(childItem);
 			}
 		} else if (node.isArray()) {
-			int size = node.size();
-			treeItem = new TreeItem<>(name + " array(" + size + ")");
-			int i = 1;
-			for (JsonNode arrayElement : node) {
-				treeItem.getChildren().add(createTreeItem(arrayElement, name + "[" + i + "]"));
-				i++;
-			}
+			handleArrayNode(parent, node, name);
 		} else {
-			treeItem = new TreeItem<>(node.asText());
+			Platform.runLater(() -> parent.getChildren().add(new TreeItem<>(node.asText())));
 		}
+	}
 
-		return treeItem;
+	private void handleArrayNode(TreeItem<String> parent, JsonNode node, String name) {
+		int i = 1;
+		final List<TreeItem<String>> children = new ArrayList<>();
+		for (JsonNode arrayElement : node) {
+			children.add(createTreeItem(arrayElement, name + "[" + i + "]"));
+			i++;
+		}
+		Platform.runLater(() -> parent.getChildren().addAll(children));
 	}
 
 	@FXML
@@ -101,8 +135,7 @@ public class MainWindowController implements Initializable {
 			log.info("Selected file: " + absolutePath);
 
 			model = null;
-			treeView.setRoot(new TreeItem<>("Loading..."));
-			System.gc();
+			treeView.setRoot(new TreeItem<>(LOADING));
 
 			new Thread(() -> {
 				try {
@@ -119,8 +152,10 @@ public class MainWindowController implements Initializable {
 
 	void loadXML(String absolutePath) throws IOException {
 		model = new ProjectModel(absolutePath);
-		TreeItem<String> treeRoot = createTreeItem(model.getFileTree(), model.getRootTag());
-		treeView.setRoot(treeRoot);
+		Platform.runLater(() -> {
+			TreeItem<String> treeRoot = createTreeItem(model.getFileTree(), model.getRootTag());
+			treeView.setRoot(treeRoot);
+		});
 	}
 
 	@FXML
