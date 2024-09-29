@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import javax.xml.stream.XMLStreamException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import javafx.application.Platform;
@@ -14,10 +17,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -30,6 +35,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.talaatharb.xtreeve.models.ProjectModel;
 import net.talaatharb.xtreeve.utils.GUIUtils;
+import net.talaatharb.xtreeve.utils.XMLUtils;
 
 @Slf4j
 @NoArgsConstructor
@@ -61,45 +67,54 @@ public class MainWindowController implements Initializable {
 	@FXML
 	private ProgressBar progressBar;
 
+	@Setter(value = AccessLevel.PACKAGE)
+	@FXML
+	private CheckBox withAttributesCheckbox;
+
+	private TextArea codeArea = new TextArea();
+
 	private ProjectModel model;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		log.info("Main window loaded");
 
-		treeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem && (jsonTreeItem.getJsonNode()
-					.isObject()
-					|| (jsonTreeItem.getJsonNode().isArray() && jsonTreeItem.getJsonNode().get(0).isTextual()))) {
-				var tableContent = createJsonNodeTable(jsonTreeItem.getJsonNode());
-				detailViewPane.getChildren().clear();
-				detailViewPane.getChildren().add(tableContent);
-				GUIUtils.setAnchorNoPadding(tableContent);
+		codeArea.setWrapText(true);
+		codeArea.setEditable(false);
+		
+		editorPane.getChildren().add(codeArea);
+		GUIUtils.setAnchorNoPadding(codeArea);
+
+		treeView.getSelectionModel().selectedItemProperty()
+				.addListener((observable, oldValue, newValue) -> handleSelectionChange(newValue));
+
+	}
+
+	private void handleSelectionChange(TreeItem<String> newValue) {
+		if (newValue != null && newValue instanceof JsonTreeItem jsonTreeItem && (jsonTreeItem.getJsonNode().isObject()
+				|| (jsonTreeItem.getJsonNode().isArray() && jsonTreeItem.getJsonNode().get(0).isTextual()))) {
+			var tableContent = createJsonNodeTable(jsonTreeItem.getJsonNode());
+			detailViewPane.getChildren().clear();
+			detailViewPane.getChildren().add(tableContent);
+			GUIUtils.setAnchorNoPadding(tableContent);
+
+			try {
+				String value = jsonTreeItem.getValue() != null ? jsonTreeItem.getValue() : "root";
+				String rootName = value.contains(" ") ? value.split(" ")[0] : value;
+				String editorText = withAttributesCheckbox.isSelected()
+						? XMLUtils.jsonNodeToStrippedXmlWithAttributes(jsonTreeItem.getJsonNode(), rootName)
+						: XMLUtils.jsonNodeToStrippedXml(jsonTreeItem.getJsonNode(), rootName);
+				codeArea.setText(editorText);
+			} catch (XMLStreamException | JsonProcessingException e) {
+				log.error(e.getMessage());
 			}
-		});
-
-	}
-
-	// A simple model class to hold the key-value pairs
-	public static class JsonNodeEntry {
-		private final String key;
-		private final String value;
-
-		public JsonNodeEntry(String key, String value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		public String getKey() {
-			return key;
-		}
-
-		public String getValue() {
-			return value;
+		}else {
+			codeArea.setText("");
+			detailViewPane.getChildren().clear();
 		}
 	}
 
-	public static TableView<JsonNodeEntry> createJsonNodeTable(JsonNode node) {
+	public static final TableView<JsonNodeEntry> createJsonNodeTable(JsonNode node) {
 		// Create a TableView with two columns: one for keys and one for values
 		TableView<JsonNodeEntry> tableView = new TableView<>();
 
@@ -113,7 +128,7 @@ public class MainWindowController implements Initializable {
 		tableView.getColumns().add(valueColumn);
 
 		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
-		
+
 		// Populate the table with data from the JsonNode
 		ObservableList<JsonNodeEntry> data = FXCollections.observableArrayList();
 
@@ -143,7 +158,7 @@ public class MainWindowController implements Initializable {
 		return tableView;
 	}
 
-	public static VBox createJsonNodeTableView(JsonNode node) {
+	public static final VBox createJsonNodeTableView(JsonNode node) {
 		// Create a VBox to hold the table
 		VBox vbox = new VBox();
 		TableView<JsonNodeEntry> tableView = createJsonNodeTable(node);
