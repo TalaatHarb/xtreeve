@@ -112,6 +112,8 @@ public class MainWindowController implements Initializable {
 		tableView.getColumns().add(keyColumn);
 		tableView.getColumns().add(valueColumn);
 
+		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+		
 		// Populate the table with data from the JsonNode
 		ObservableList<JsonNodeEntry> data = FXCollections.observableArrayList();
 
