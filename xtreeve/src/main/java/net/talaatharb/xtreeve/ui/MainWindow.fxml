@@ -14,11 +14,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.talaatharb.xtreeve.controllers.MainWindowController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" styleClass="app-root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.talaatharb.xtreeve.controllers.MainWindowController">
    <children>
-      <VBox layoutX="10.0" layoutY="10.0" prefHeight="400.0" prefWidth="640.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox layoutX="10.0" layoutY="10.0" prefHeight="400.0" prefWidth="640.0" spacing="12.0" styleClass="content-root" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <MenuBar VBox.vgrow="NEVER">
+            <MenuBar styleClass="app-menu-bar" VBox.vgrow="NEVER">
                <menus>
                   <Menu mnemonicParsing="false" text="File">
                      <items>
@@ -54,48 +54,54 @@
                   </Menu>
                </menus>
             </MenuBar>
-            <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+            <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" styleClass="workspace-card" VBox.vgrow="ALWAYS">
                <children>
-                  <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.56" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" styleClass="workspace-split" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" styleClass="section-panel">
                            <children>
-                              <SplitPane dividerPositions="0.2" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <SplitPane dividerPositions="0.28" prefHeight="160.0" prefWidth="200.0" styleClass="editor-split" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <items>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="section-panel section-panel-left">
                                        <children>
-                                          <TreeView fx:id="treeView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                          <TreeView fx:id="treeView" prefHeight="200.0" prefWidth="200.0" styleClass="tree-panel" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                        </children>
                                     </AnchorPane>
-                                    <VBox alignment="TOP_RIGHT">
+                                    <VBox alignment="TOP_RIGHT" spacing="8.0" styleClass="section-panel section-panel-right">
                                        <children>
-                                          <CheckBox fx:id="withAttributesCheckbox" mnemonicParsing="false" selected="true" text="With attributes">
+                                          <CheckBox fx:id="withAttributesCheckbox" mnemonicParsing="false" selected="true" styleClass="option-checkbox" text="With attributes">
                                              <VBox.margin>
                                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                              </VBox.margin>
                                           </CheckBox>
-                                        <AnchorPane fx:id="editorPane" prefHeight="160.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+                                        <AnchorPane fx:id="editorPane" prefHeight="160.0" prefWidth="100.0" styleClass="editor-surface" VBox.vgrow="ALWAYS" />
                                        </children>
+                                       <padding>
+                                          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                       </padding>
                                     </VBox>
                                 </items>
                               </SplitPane>
                            </children>
                         </AnchorPane>
-                      <AnchorPane fx:id="detailViewPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+                      <AnchorPane fx:id="detailViewPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" styleClass="section-panel detail-panel" />
                     </items>
                   </SplitPane>
                </children>
             </AnchorPane>
-            <HBox alignment="CENTER" spacing="5.0">
+            <HBox alignment="CENTER" spacing="10.0" styleClass="status-bar">
                <children>
                   <Separator prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                  <ProgressBar fx:id="progressBar" disable="true" prefWidth="200.0" visible="false" />
+                  <ProgressBar fx:id="progressBar" disable="true" prefWidth="220.0" styleClass="progress-indicator" visible="false" />
                </children>
                <padding>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  <Insets bottom="8.0" left="5.0" right="5.0" top="2.0" />
                </padding>
             </HBox>
          </children>
+         <padding>
+            <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+         </padding>
       </VBox>
    </children>
 </AnchorPane>

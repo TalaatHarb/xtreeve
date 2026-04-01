@@ -276,7 +276,7 @@ public class MainWindowController implements Initializable {
 					loadXML(absolutePath);
 					Platform.runLater(() -> progressBar.setVisible(false));
 				} catch (IOException e) {
-					log.error("Unable to load file");
+					log.error("Unable to load file", e.getMessage());
 				}
 			}).start();
 

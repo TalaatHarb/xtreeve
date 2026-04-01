@@ -1,1 +1,317 @@
-/* Theme file */
+/* XTreeve dark workspace theme */
+
+.root,
+.app-root {
+    -fx-font-family: "Segoe UI", "Inter", "Arial", sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #0f172a 0%, #111827 45%, #0b1120 100%);
+    -fx-accent: #38bdf8;
+    -fx-focus-color: rgba(56, 189, 248, 0.75);
+    -fx-faint-focus-color: rgba(56, 189, 248, 0.12);
+}
+
+.content-root {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+}
+
+.label,
+.menu,
+.menu-item,
+.check-box,
+.tree-cell,
+.table-view,
+.text-area,
+.progress-bar {
+    -fx-text-fill: #e5eefb;
+}
+
+.app-menu-bar {
+    -fx-background-color: rgba(15, 23, 42, 0.92);
+    -fx-background-radius: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.2);
+    -fx-border-radius: 0;
+    -fx-padding: 6 10 6 10;
+    -fx-effect: dropshadow(gaussian, rgba(2, 8, 23, 0.45), 18, 0.18, 0, 6);
+}
+
+.app-menu-bar .menu {
+    -fx-background-radius: 0;
+    -fx-padding: 6 12 6 12;
+}
+
+.app-menu-bar .menu:hover,
+.app-menu-bar .menu:showing {
+    -fx-background-color: rgba(56, 189, 248, 0.14);
+}
+
+.context-menu {
+    -fx-background-color: #132238;
+    -fx-background-radius: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.2);
+    -fx-border-radius: 0;
+    -fx-padding: 6;
+}
+
+.menu-item {
+    -fx-background-radius: 0;
+    -fx-padding: 8 14 8 14;
+}
+
+.menu-item:focused {
+    -fx-background-color: rgba(56, 189, 248, 0.18);
+}
+
+.workspace-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.94));
+    -fx-background-radius: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.18);
+    -fx-border-radius: 0;
+    -fx-padding: 1;
+    -fx-effect: dropshadow(gaussian, rgba(2, 8, 23, 0.5), 28, 0.2, 0, 10);
+}
+
+.section-panel,
+.section-panel-left,
+.section-panel-right,
+.detail-panel,
+.editor-surface,
+.status-bar,
+AnchorPane,
+VBox,
+HBox {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.section-panel {
+    -fx-background-color: linear-gradient(to bottom, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.94));
+    -fx-background-insets: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.12);
+}
+
+.detail-panel {
+    -fx-padding: 12;
+}
+
+.workspace-split,
+.editor-split,
+.split-pane {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0;
+}
+
+.split-pane-divider {
+    -fx-background-color: rgba(71, 85, 105, 0.75);
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0.5;
+}
+
+.tree-panel {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 10 8 10 8;
+}
+
+.tree-panel .virtual-flow,
+.tree-panel .clipped-container,
+.tree-panel .sheet {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+}
+
+.tree-panel .tree-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 7 10 7 10;
+    -fx-text-fill: #dbe7f5;
+}
+
+.tree-panel .tree-cell:hover {
+    -fx-background-color: rgba(51, 65, 85, 0.72);
+}
+
+.tree-panel .tree-cell:selected {
+    -fx-background-color: linear-gradient(to right, rgba(14, 165, 233, 0.32), rgba(56, 189, 248, 0.14));
+    -fx-text-fill: white;
+}
+
+.option-checkbox {
+    -fx-text-fill: #dbe7f5;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 4 8 4 4;
+}
+
+.option-checkbox .box {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(148, 163, 184, 0.5);
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+.option-checkbox:selected .box {
+    -fx-background-color: linear-gradient(to bottom, #38bdf8, #0ea5e9);
+    -fx-border-color: #7dd3fc;
+}
+
+.option-checkbox:selected .mark {
+    -fx-background-color: white;
+}
+
+.editor-surface {
+    -fx-padding: 10;
+}
+
+.text-area {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.24);
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-font-family: "Cascadia Code", "Consolas", monospace;
+    -fx-font-size: 13px;
+    -fx-highlight-fill: rgba(56, 189, 248, 0.35);
+    -fx-highlight-text-fill: white;
+}
+
+.text-area .content {
+    -fx-background-color: #0b1220;
+    -fx-background-radius: 0;
+    -fx-padding: 14;
+}
+
+.text-area:focused {
+    -fx-border-color: rgba(56, 189, 248, 0.55);
+}
+
+.table-view {
+    -fx-background-color: #0f172a;
+    -fx-background-insets: 0;
+    -fx-border-color: rgba(148, 163, 184, 0.24);
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0;
+}
+
+.table-view .virtual-flow,
+.table-view .clipped-container,
+.table-view .sheet,
+.table-view .corner {
+    -fx-background-color: #0f172a;
+    -fx-background-radius: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-size: 38;
+    -fx-border-color: transparent transparent rgba(148, 163, 184, 0.22) transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #f8fafc;
+    -fx-font-weight: 700;
+}
+
+.table-row-cell {
+    -fx-background-color: #111827;
+    -fx-background-insets: 0;
+    -fx-table-cell-border-color: rgba(148, 163, 184, 0.12);
+    -fx-text-fill: #f8fafc;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #162033;
+}
+
+.table-row-cell:filled:hover {
+    -fx-background-color: #22304a;
+}
+
+.table-row-cell:filled:selected {
+    -fx-background-color: #0f3a5a;
+}
+
+.table-row-cell:filled:selected .table-cell {
+    -fx-text-fill: #ffffff;
+}
+
+.table-cell {
+    -fx-padding: 10 12 10 12;
+    -fx-border-color: transparent;
+    -fx-text-fill: #f1f5f9;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.status-bar {
+    -fx-background-color: rgba(15, 23, 42, 0.82);
+    -fx-border-color: rgba(148, 163, 184, 0.18);
+}
+
+.separator .line {
+    -fx-border-color: rgba(148, 163, 184, 0.2);
+}
+
+.progress-indicator,
+.progress-bar,
+.progress-indicator > .track,
+.progress-indicator > .bar {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.progress-indicator {
+    -fx-accent: #38bdf8;
+}
+
+.progress-indicator > .track {
+    -fx-background-color: rgba(51, 65, 85, 0.75);
+}
+
+.progress-indicator > .bar {
+    -fx-background-color: #38bdf8;
+    -fx-background-insets: 0;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(100, 116, 139, 0.72);
+    -fx-background-radius: 0;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: rgba(148, 163, 184, 0.88);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button,
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: "";
+    -fx-background-color: transparent;
+}
+
+.tooltip {
+    -fx-background-color: rgba(15, 23, 42, 0.96);
+    -fx-text-fill: #e5eefb;
+    -fx-background-radius: 0;
+    -fx-padding: 8 10 8 10;
+    -fx-border-color: rgba(148, 163, 184, 0.2);
+    -fx-border-radius: 0;
+}
